@@ -1,0 +1,26 @@
+{
+  "name": "@pcqxh/memory-bank",
+  "version": "1.0.0",
+  "description": "Initialize AI Memory Bank structure for your project",
+  "bin": {
+    "mb": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "cursor",
+    "memory-bank",
+    "context",
+    "documentation",
+    "workflow"
+  ],
+  "author": "pcqxh",
+  "license": "MIT"
+}
