@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Initialize AI Memory Bank structure for your project",
   "bin": {
-    "mb": "./bin/cli.js"
+    "mb": "bin/cli.js"
   },
   "files": [
     "bin",
