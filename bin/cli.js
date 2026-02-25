@@ -28,9 +28,54 @@ function extractTemplate(content, templateName) {
   if (beginIndex === -1 || endIndex === -1 || endIndex <= beginIndex) return null;
 
   const startPos = beginIndex + beginMarker.length;
-  let extracted = content.substring(startPos, endIndex);
-  return extracted.replace(/^\n+/, '').replace(/\n+$/, '') + '\n';
+  return content.substring(startPos, endIndex).replace(/^\n+/, '').replace(/\n+$/, '') + '\n';
 }
+
+// ─── 生成提示词 ───────────────────────────────────────────────────────────────
+
+function generatePrompt(templateContent) {
+  const today = new Date().toISOString().slice(0, 10);
+  const projectTemplate = extractTemplate(templateContent, 'PROJECT.md');
+  const modulesTemplate = extractTemplate(templateContent, 'MODULES.md');
+
+  return `# Memory Bank 填充提示词
+> 生成时间：${today}
+> 将以下内容粘贴给 AI，让它分析当前项目并填写文档。
+
+---
+
+## 你的任务
+
+分析当前项目，根据项目的实际情况，填写以下两份文档：
+
+1. **PROJECT.md** — 技术规范文档
+2. **MODULES.md** — 功能模块清单
+
+**要求**：
+- 输出纯 Markdown，不要用代码块包裹整个文档
+- 所有占位符（方括号内的文字）必须替换为真实内容
+- 无法推断的信息填写"待补充"
+- 文档底部更新日期填写：${today}
+- 先输出 PROJECT.md 的完整内容，再输出 MODULES.md 的完整内容
+- 两份文档之间用 \`---\` 分隔
+
+---
+
+## PROJECT.md 模板
+
+${projectTemplate}
+---
+
+## MODULES.md 模板
+
+${modulesTemplate}
+---
+
+请开始生成。
+`;
+}
+
+// ─── 主流程 ──────────────────────────────────────────────────────────────────
 
 function init() {
   // 3. 关键修改：从库的安装位置读取模板，而不是当前目录
@@ -43,7 +88,6 @@ function init() {
 
   console.log('🚀 Initializing AI Memory Bank...\n');
   const templateContent = fs.readFileSync(templatePath, 'utf-8');
-  let successCount = 0;
 
   for (const [name, relPath] of Object.entries(TEMPLATE_CONFIG)) {
     // 目标绝对路径
@@ -72,16 +116,28 @@ function init() {
     if (content) {
       fs.writeFileSync(targetPath, content, 'utf-8');
       console.log(`✅ Created: ${relPath}`);
-      successCount++;
     } else {
       console.warn(`⚠️  Template not found: ${name}`);
     }
   }
 
-  console.log('\n✨ Done! Memory Bank is ready.');
-  if (successCount > 0) {
-    console.log('👉 Tip: Ask Claude to "Read MODULES.md" to get started.');
+  // 生成 AI 填充提示词
+  const mbDir = path.join(TARGET_ROOT, '.memory-bank');
+  if (!fs.existsSync(mbDir)) {
+    fs.mkdirSync(mbDir, { recursive: true });
   }
+  fs.writeFileSync(path.join(mbDir, 'ANALYZE_PROMPT.md'), generatePrompt(templateContent), 'utf-8');
+
+  console.log('\n✨ Done! Memory Bank is ready.');
+  console.log('─'.repeat(60));
+  console.log('📋 下一步：让 AI 帮你填写文档');
+  console.log('  1. 打开 .memory-bank/ANALYZE_PROMPT.md');
+  console.log('  2. 复制全部内容，粘贴给任意 AI');
+  console.log('     （Claude / ChatGPT / Gemini 均可）');
+  console.log('  3. 将 AI 输出分别粘贴到：');
+  console.log('     - .memory-bank/PROJECT.md');
+  console.log('     - .memory-bank/MODULES.md');
+  console.log('─'.repeat(60));
 }
 
 init();
