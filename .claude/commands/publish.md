@@ -9,12 +9,11 @@
 - 根据改动内容自行总结 commit message（遵循 conventional commits 格式）
 - 执行 `git add -A && git commit -m "<message>"`
 
-**2. 确认版本升级类型**
+**2. 根据改动内容自行判断版本升级类型**
 
-询问用户选择：
-- `patch` — 修复 bug（1.0.0 → 1.0.1）
-- `minor` — 新功能（1.0.0 → 1.1.0）
-- `major` — 破坏性变更（1.0.0 → 2.0.0）
+- `patch` — 仅 bug 修复、文字调整、无新功能
+- `minor` — 新增功能、向后兼容
+- `major` — 破坏性变更、不向后兼容
 
 **3. 执行发布流程**
 
@@ -22,9 +21,12 @@
 ```bash
 npm version <patch|minor|major>
 git push
-npm publish --access public
 ```
 
-**4. 完成后输出**
+**4. 将发布命令复制到剪贴板**
 
-告知用户新版本号和发布结果。
+npm 发布需要生物验证，执行以下命令将发布命令复制到剪贴板，然后提示用户在 VS Code 终端粘贴并按 Enter：
+
+```bash
+echo -n "npm publish --access public" | pbcopy
+```
